@@ -6,12 +6,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -20,18 +18,17 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -44,7 +41,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -110,8 +106,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //Stopwatch
     private Chronometer mChronometer;
-    private Button button;
+    private Button stopButton;
+    private Button startButton;
 
+//    private durationChronometer dChronometer;
+
+
+//    durationChronometer dChronometer = new durationChronometer(Context);
 
 
     @Override
@@ -143,10 +144,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         textView = (TextView) findViewById(R.id.textView);
 
 
-        button = (Button) findViewById(R.id.stop_reset_button);
-        button.setText("Stop");
-        button.getBackground().setColorFilter(0xFFFF0000, PorterDuff.Mode.MULTIPLY);
-        button.setOnClickListener(new View.OnClickListener() {
+        stopButton = (Button) findViewById(R.id.stop_reset_button);
+        stopButton.setText("Start");
+        //color list : http://namaste-android.blogspot.com/2012/03/argb-color-codes.html
+        //color list : http://angrytools.com/android/button/
+        stopButton.getBackground().setColorFilter(0xFF008B8B, PorterDuff.Mode.MULTIPLY);
+        stopButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -350,24 +353,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    public void startResume(View view) {
-        startLocationUpdates();
-        mChronometer.start();
-    }
-
 
     public void stopReset(View view) {
-        if( button.getText().equals("Stop")) {
+
+        if (stopButton.getText().equals("Start")){
+            mChronometer.start();
+            stopButton.setText("Stop");
+            stopButton.getBackground().setColorFilter(0xFFFF0000, PorterDuff.Mode.MULTIPLY);
+        } else if (stopButton.getText().equals("Stop")) {
             mChronometer.stop();
-            button.setText("Reset");
-            button.getBackground().setColorFilter(0xFFD3D3D3, PorterDuff.Mode.MULTIPLY);
-        } else if(button.getText().equals("Reset")) {
-            mChronometer.setBase(SystemClock.elapsedRealtime());
-            button.setText("Stop");
-            button.getBackground().setColorFilter(0xFFFF0000, PorterDuff.Mode.MULTIPLY);
+            stopButton.setText("Resume");
+            stopButton.getBackground().setColorFilter(0xFF008B8B, PorterDuff.Mode.MULTIPLY);
+        } else if(stopButton.getText().equals("Resume")) {
+            mChronometer.start();
+            stopButton.setText("Stop");
+            stopButton.getBackground().setColorFilter(0xFFFF0000, PorterDuff.Mode.MULTIPLY);
         } else {
 
         }
+    }
+
+
+    public void startResume(View view) {
+        startLocationUpdates();
+        mChronometer.setBase(SystemClock.elapsedRealtime());
+//        stopButton.getBackground().setColorFilter(0xFFD3D3D3, PorterDuff.Mode.MULTIPLY);
     }
 
     @Override
@@ -376,7 +386,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (location != null) {
             textView.append("\n"+"Lat, Lng : " + location.getLatitude() +", " + location.getLongitude());
             LatLng current = new LatLng(location.getLatitude(),location.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(current).visible(true).draggable(true));
+            mMap.addMarker(new MarkerOptions().position(current).visible(false).draggable(true));
 
             //if there is on one LatLng, then set same value.
             if(polynum == 0) {
@@ -440,7 +450,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(sandiego).title("Marker in San Diego"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sandiego));
 
-        // Add a button for current my location
+        // Add a buttoooon for current my location
         mMap.setMyLocationEnabled(true);
 
     }
